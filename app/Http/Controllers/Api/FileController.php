@@ -2,12 +2,23 @@
 
 namespace App\Http\Controllers\Api;
 
-use Exception;
+use App\Http\Controllers\Controller;
+use App\Models\{File};
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Storage;
 
-class FileController extends ApiController
+class FileController extends Controller
 {
+    private $model;
+
+    private $fileSize = 2048; // 2MB
+
+    public function __construct(File $model) {
+        $this->model = $model;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -36,20 +47,19 @@ class FileController extends ApiController
      */
     public function store(Request $request)
     {
-        // $input = $request->validate([
-        //     'file' => 'file',
-        //     'description' => 'string|max:10'
-        // ]);
-
-
         try {
             // throw new Exception("aqui tem");
+            // dd($request->file('file')->isError());
+            // if ($request->file('file')->getSize() > $this->fileSize) {
+            //     return $this->sendError('The uploaded file exceeds the max file size', [], 400);
+            // }
+
             if (!($request->hasFile('file') && $request->file('file')->isValid())) {
-                return $this->sendError('Invalid file content or empty.', [], 400);
+                return response(['message' => 'Invalid file content or empty.'], Response::HTTP_BAD_REQUEST);
             }
 
             if (!($request->file('file')->getClientMimeType() === 'application/pdf' || $request->file('file')->getClientOriginalExtension() === 'pdf')) {
-                return $this->sendError('Invalid file content.', [], 400);
+                return response(['message' => 'Invalid file content.'], Response::HTTP_BAD_REQUEST);
             }
 
             // echo "MimeType: " . $request->file('file')->getClientMimeType()."<br>";
@@ -57,19 +67,32 @@ class FileController extends ApiController
             // echo "OriginalName: " . $request->file('file')->getClientOriginalName()."<br>";
             // echo "Size: " . $request->file('file')->getSize()."<br>";
             // echo "<br>";
-            // $uuid = Str::uuid()->toString();
 
-            $uuid = (string) Str::uuid();
+            // $uuid = (string) Str::uuid();
 
             $orderedUuid = (string) Str::orderedUuid();
-            $isUuid = Str::isUuid($orderedUuid);
+            // $isUuid = Str::isUuid($orderedUuid);
+            // dd($request->description);
+            // $path = $request->file('file')->store('files/default', 'public');
 
-            $path = $request->file('file')->store('files', 'public');
+            $payload = [
+                'uuid' => $orderedUuid,
+                'name' => $request->file('file')->getClientOriginalName(),
+                'description' => $request->description,
+                'path' => $request->file('file')->store('folders/files/default', 'public')
+            ];
+            $result = File::create($payload);
 
-            return $this->sendError('created file successfully', [$uuid, $isUuid, $orderedUuid, $path], 201);
+            $response = [
+                'id' => $result->uuid,
+                'name' => $result->name,
+                'description'=> $result->description
+            ];
+
+            return response($response, Response::HTTP_CREATED);
 
         } catch (\Exception $ex) {
-            return $this->sendError('Invalid file content or empty.', $ex->getTrace(), 400);
+            return response(['message' => 'Invalid file content or empty.', $ex->getTrace()], Response::HTTP_BAD_REQUEST);
         }
 
     }
@@ -82,13 +105,17 @@ class FileController extends ApiController
      */
     public function show($id)
     {
-        return response()->json([
-            'name' => 'Ronaldo santos',
-            'status' => true,
-            'photo' => false,
-            'extraData' => [],
-            'id:' => $id
-        ]);
+        $search = File::where('uuid', $id)->first();
+
+        if(!$search) {
+            return response(['message' => 'No results'], Response::HTTP_OK);
+        }
+
+        $headers = ['Content-Type' => 'application/pdf'];
+
+        return response(Storage::disk('public')->get($search->path), Response::HTTP_OK, $headers);
+
+        // return Storage::download($search->path, $search->name, $headers);
     }
 
     /**

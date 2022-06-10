@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ValidateFile extends FormRequest
+class ValidateBusinessUnit extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,16 +23,22 @@ class ValidateFile extends FormRequest
      */
     public function rules()
     {
-
         return [
-            'file' => 'required|mimes:pdf,xlx,csv|max:2048',
+            'name' => 'required',
+        ];
+    }
+
+    public function attributes()
+    {
+        return [
+            'name' => 'email address',
         ];
     }
 
     public function messages()
     {
         return [
-            'file.required' => 'Invalid file content, send only a file at a time',
+            'name.required' => 'Invalid file content, send only a file at a time',
         ];
     }
 }

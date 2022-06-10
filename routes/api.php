@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Api\{FileController};
+use App\Http\Controllers\Api\{BusinessUnitController, FileController};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -19,7 +19,6 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 
+Route::apiResource('file', FileController::class)->except(['index', 'create', 'edit', 'update', 'destroy']);
 
-// Route::apiResource('file', FileController::class)->except(['create', 'update', 'destroy', 'index']);
-Route::get('file/{id}', [FileController::class, 'show']);
-Route::post('file', [FileController::class, 'store']);
+Route::apiResource('business-unit', BusinessUnitController::class)->except(['create', 'edit']);
