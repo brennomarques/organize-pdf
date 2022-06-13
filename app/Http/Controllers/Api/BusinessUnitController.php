@@ -3,13 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ValidateBusinessUnit;
 use App\Http\Resources\{BusinessUnitResource, BusinessUnitResourceCollection};
 use App\Models\{BusinessUnit};
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Validator;
 
 class BusinessUnitController extends Controller
 {
@@ -22,10 +20,16 @@ class BusinessUnitController extends Controller
     /**
      * Display a listing of the resource.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
+        if ($request->has('id')) {
+            $fields = $request->get('id');
+            return BusinessUnitController::show($fields);
+        }
+
         $response = BusinessUnit::paginate(10);
         return new BusinessUnitResourceCollection($response);
     }
@@ -46,7 +50,7 @@ class BusinessUnitController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(ValidateBusinessUnit $payload)
+    public function store(Request $payload)
     {
         $orderedUuid = (string) Str::orderedUuid();
 
@@ -65,10 +69,10 @@ class BusinessUnitController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  string  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(string $id)
     {
         $search = BusinessUnit::where('uuid', $id)->first();
 
@@ -101,7 +105,7 @@ class BusinessUnitController extends Controller
     {
         $response = BusinessUnit::where('uuid', $id)->first();
 
-        if (!$response){
+        if (!$response) {
             return response(['message' => 'Business unit not found'], Response::HTTP_OK);
         }
         $response->update($request->all());
@@ -125,5 +129,21 @@ class BusinessUnitController extends Controller
 
         $response->delete();
         return response(['message' => 'deleted business unit'], Response::HTTP_OK);
+    }
+
+    /**
+     * Validate inputted data for created and updated resource
+     *
+     * @return array
+     */
+    protected function validatedInput(): array
+    {
+        return $this->request->validate(
+            [
+                'name'  => ['nullable', 'string', 'max:255'],
+                'document' => ['nullable', 'string'],
+                // 'email' => ['required', 'email'],
+            ]
+        );
     }
 }
