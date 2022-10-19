@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ValidateBusinessUnit;
 use App\Http\Resources\{BusinessUnitResource, BusinessUnitResourceCollection};
 use App\Models\{BusinessUnit};
 use Illuminate\Support\Str;
@@ -27,21 +28,11 @@ class BusinessUnitController extends Controller
     {
         if ($request->has('id')) {
             $fields = $request->get('id');
-            return BusinessUnitController::show($fields);
+            return static::show($fields);
         }
 
         $response = BusinessUnit::paginate(10);
         return new BusinessUnitResourceCollection($response);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
     }
 
     /**
@@ -50,19 +41,25 @@ class BusinessUnitController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $payload)
+    public function store(ValidateBusinessUnit $request)
     {
-        $orderedUuid = (string) Str::orderedUuid();
+        try {
+            $orderedUuid = (string) Str::orderedUuid();
 
-        $data = $payload->all();
-        $data['uuid'] = $orderedUuid;
+            $data = $request->all();
+            $data['uuid'] = $orderedUuid;
 
-        $response = BusinessUnit::create($data);
+            $response = BusinessUnit::create($data);
 
-        if (!$response) {
-            return response(['message' => 'failed to process data'], Response::HTTP_BAD_REQUEST);
+            if (!$response) {
+                return response(['message' => 'failed to process data'], Response::HTTP_BAD_REQUEST);
+            }
+            return new BusinessUnitResource($response);
+
+        } catch (\Throwable $th) {
+            return response([$th->getTrace()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-        return new BusinessUnitResource($response);
+
 
     }
 
@@ -84,24 +81,13 @@ class BusinessUnitController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(ValidateBusinessUnit $request, $id)
     {
         $response = BusinessUnit::where('uuid', $id)->first();
 
@@ -129,21 +115,5 @@ class BusinessUnitController extends Controller
 
         $response->delete();
         return response(['message' => 'deleted business unit'], Response::HTTP_OK);
-    }
-
-    /**
-     * Validate inputted data for created and updated resource
-     *
-     * @return array
-     */
-    protected function validatedInput(): array
-    {
-        return $this->request->validate(
-            [
-                'name'  => ['nullable', 'string', 'max:255'],
-                'document' => ['nullable', 'string'],
-                // 'email' => ['required', 'email'],
-            ]
-        );
     }
 }

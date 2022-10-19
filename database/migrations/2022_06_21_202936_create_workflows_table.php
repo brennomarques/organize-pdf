@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateBusinessUnitsTable extends Migration
+class CreateWorkflowsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,18 +13,17 @@ class CreateBusinessUnitsTable extends Migration
      */
     public function up()
     {
-        Schema::create('business_units', function (Blueprint $table) {
+        Schema::create('workflows', function (Blueprint $table) {
             $table->id()->unsigned();
             $table->uuid('uuid')->index()->nullable(false);
             $table->bigInteger('user_id')->unsigned();
+            $table->boolean('auto_initiate')->nullable(false);
+            $table->timestamp('due_date_at')->nullable(false);
             $table->string('name')->nullable(false);
-            $table->string('document')->nullable(false);
-            $table->string('zipCode')->nullable(false);
-            $table->string('address');
-            $table->string('city');
-            $table->string('state');
-            $table->string('country');
-            $table->boolean('status')->nullable(false);
+            $table->integer('priority')->nullable(false);
+            $table->text('message')->nullable(true);
+            $table->integer('status')->nullable(false);
+            $table->timestamp('data_status_at')->nullable();
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
@@ -38,6 +37,6 @@ class CreateBusinessUnitsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('business_units');
+        Schema::dropIfExists('workflows');
     }
 }

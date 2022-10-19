@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateBusinessUnitsTable extends Migration
+class CreateContactsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,17 +13,13 @@ class CreateBusinessUnitsTable extends Migration
      */
     public function up()
     {
-        Schema::create('business_units', function (Blueprint $table) {
+        Schema::create('contacts', function (Blueprint $table) {
             $table->id()->unsigned();
             $table->uuid('uuid')->index()->nullable(false);
             $table->bigInteger('user_id')->unsigned();
             $table->string('name')->nullable(false);
-            $table->string('document')->nullable(false);
-            $table->string('zipCode')->nullable(false);
-            $table->string('address');
-            $table->string('city');
-            $table->string('state');
-            $table->string('country');
+            $table->string('email')->unique()->nullable(false);
+            $table->string('phone')->nullable(true);
             $table->boolean('status')->nullable(false);
             $table->timestamps();
 
@@ -38,6 +34,6 @@ class CreateBusinessUnitsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('business_units');
+        Schema::dropIfExists('contracts');
     }
 }

@@ -5,16 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class File extends Model
+class Contact extends Model
 {
-
-    public const SUPPORTED_FORMATS = [
-        'pdf'
-    ];
-
     use HasFactory;
-
-    protected $connection = "mysql";
 
     /**
      * The attributes that are mass assignable.
@@ -23,9 +16,9 @@ class File extends Model
      */
     protected $fillable = [
         'uuid',
+        'user_id',
         'name',
-        'size',
-        'description',
-        'path'
+        'email',
+        'status',
     ];
 }

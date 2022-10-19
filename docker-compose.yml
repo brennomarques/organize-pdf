@@ -24,6 +24,8 @@ services:
 
     mailcatcher:
         image: schickling/mailcatcher
+        container_name: myapp-mailcatcher
         ports:
-            - 1025:1025
             - 1080:1080
+            - 1025:1025
+

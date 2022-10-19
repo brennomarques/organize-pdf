@@ -2,7 +2,11 @@
 
 namespace App\Http\Requests;
 
+use App\Models\File;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\Response;
 
 class ValidateFile extends FormRequest
 {
@@ -23,16 +27,28 @@ class ValidateFile extends FormRequest
      */
     public function rules()
     {
+        $mimes = implode(',', File::SUPPORTED_FORMATS);
 
         return [
-            'file' => 'required|mimes:pdf,xlx,csv|max:2048',
+            'file' => [
+                'bail',
+                'required',
+                'file',
+                "mimes:{$mimes}",
+                'max:25600' //25mb
+            ],
         ];
     }
 
-    public function messages()
+    /**
+     * Get the error messages for the defined validation rules.*
+     * @return array
+     */
+    protected function failedValidation(Validator $validator)
     {
-        return [
-            'file.required' => 'Invalid file content, send only a file at a time',
-        ];
+        throw new HttpResponseException(response([
+            'errors' => $validator->errors(),
+            'status' => true
+        ], Response::HTTP_UNPROCESSABLE_ENTITY));
     }
 }

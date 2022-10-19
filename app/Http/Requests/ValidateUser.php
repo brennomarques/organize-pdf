@@ -2,12 +2,12 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Response;
 
-class ValidateBusinessUnit extends FormRequest
+class ValidateUser extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -27,9 +27,9 @@ class ValidateBusinessUnit extends FormRequest
     public function rules()
     {
         return [
-            'name'=> 'required|min:10|max:200',
-            'document'=> 'required|min:8|max:30',
-            'status' => 'required|boolean'
+            'name'=> 'required|min:4|max:100',
+            'email' => 'required|email',
+            'password' => 'string|required'
         ];
     }
 
@@ -44,5 +44,4 @@ class ValidateBusinessUnit extends FormRequest
             'status' => true
         ], Response::HTTP_UNPROCESSABLE_ENTITY));
     }
-
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ValidateFile;
 use App\Http\Resources\FileResource;
 use App\Models\{File};
 use Illuminate\Support\Str;
@@ -47,8 +48,9 @@ class FileController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(ValidateFile $request)
     {
+
         if (!($request->hasFile('file') && $request->file('file')->isValid())) {
             return response(['message' => 'Invalid file content or empty.'], Response::HTTP_BAD_REQUEST);
         }
@@ -61,6 +63,7 @@ class FileController extends Controller
         $payload = [
             'uuid' => $orderedUuid,
             'name' => $request->file('file')->getClientOriginalName(),
+            'size' => $request->file('file')->getSize(),
             'description' => $request->description,
             'path' => $request->file('file')->store('folders/files/default', 'public')
         ];

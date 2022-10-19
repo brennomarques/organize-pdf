@@ -1,7 +1,11 @@
 <?php
 
-use App\Http\Controllers\Api\{BusinessUnitController, FileController, UserController};
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BusinessUnitController;
+use App\Http\Controllers\Api\ContactController;
+use App\Http\Controllers\Api\FileController;
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\WorkflowController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,8 +23,25 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 
-Route::apiResource('user', UserController::class)->except(['create', 'edit', 'destroy', 'show']);
+Route::post('login', [AuthController::class, 'login'])->name('login');
+Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+Route::post('refresh', [AuthController::class, 'refresh'])->name('refresh');
+Route::post('register', [AuthController::class, 'register'])->name('register');
 
-Route::apiResource('file', FileController::class)->except(['create', 'edit', 'update', 'destroy', 'show']);
+Route::post('verify-account', [AuthController::class, 'verifyAccount'])->name('verifyAccount');
 
-Route::apiResource('business-unit', BusinessUnitController::class)->except(['create', 'edit', 'show']);
+Route::group(['middleware'=>'jwt.auth'],function() {
+
+    Route::apiResource('user', UserController::class)->except(['create', 'edit', 'destroy', 'show', 'store']);
+    Route::apiResource('file', FileController::class)->except(['create', 'edit', 'update', 'destroy', 'show']);
+    Route::apiResource('business-unit', BusinessUnitController::class)->except(['create', 'edit', 'show']);
+    Route::apiResource('contact', ContactController::class)->except(['create', 'edit', 'destroy']);
+
+    Route::post('worflow', [WorkflowController::class, 'store'])->name('store');
+
+});
+
+
+
+
+

@@ -11,6 +11,20 @@ class BusinessUnit extends Model
 
     protected $connection = "mysql";
 
-    protected $fillable = ['uuid', 'name', 'document', 'zipCode', 'address', 'city', 'state', 'country', 'status'];
-
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'uuid',
+        'name',
+        'document',
+        'zipCode',
+        'address',
+        'city',
+        'state',
+        'country',
+        'status'
+    ];
 }
